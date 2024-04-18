@@ -1,3 +1,5 @@
+const { generateToken } = require('../helpers/jwt')
+const { comparePassword } = require('../helpers/bcrypt')
 const { User } = require('../models')
 class userController {
     static register(req, res) {
@@ -18,6 +20,7 @@ class userController {
                 res.status(201).json(response)
             })
             .catch(err => {
+                console.log(err)
                 res.status(500).json(err)
             })
     }
@@ -30,6 +33,7 @@ class userController {
         })
             .then(user => {
                 if (!user) {
+                    //console.log("NOT USER")
                     throw {
                         name: "Login Error",
                         devMessage: `User with e-mail "${email}" not found`
@@ -37,20 +41,24 @@ class userController {
                 }
                 const correctPass = comparePassword(password, user.password)
                 if (!correctPass) {
+                    //console.log("PASS WRONG")
                     throw {
                         name: "Login Error",
                         devMessage: `Email and username doesn't match`
                     }
                 }
-                let response = {
-                    id: result.id,
-                    email: result.email,
-                    username: result.username,
-                    phoneNumber: result.phoneNumber
+                let payload = {
+                    id: user.id,
+                    email: user.email,
+                    username: user.username
                 }
-                res.status(201).json(response)
+                const token = generateToken(payload)
+                
+                res.status(201).json({token : token})
             })
-            .catch(res.status(401).json(err))
+            .catch(err => {
+                console.log(err)
+                res.status(401).json(err)})
     }
 }
 module.exports = userController

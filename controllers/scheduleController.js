@@ -1,8 +1,9 @@
 const { json } = require('sequelize')
-const { Doctor } = require('../models')
-class DoctorController {
-    static getAllDoctor(req, res) {
-        Doctor.findAll()
+const { Schedule } = require('../models')
+
+class ScheduleController {
+    static getAllSchedule(req, res) {
+        Schedule.findAll()
             .then(result => {
                 let response = {
                     "statusCode": 200,
@@ -18,9 +19,9 @@ class DoctorController {
                 res.status(500).json(response)
             })
     }
-    static getDoctorById(req, res) {
+    static getScheduleByDoctorId(req, res) {
         let id = req.params.id
-        Doctor.findByPk(id)
+        Schedule.findByPk(id)
             .then(result => {
                 if (result) {
                     let response = {
@@ -31,7 +32,7 @@ class DoctorController {
                 } else {
                     let response = {
                         "statusCode": 404,
-                        "message": `Data with id '${id}' is not found` 
+                        "message": `Schedule with id '${id}' is not found` 
                     }
                     res.status(404).json(response)
                 }
@@ -41,4 +42,4 @@ class DoctorController {
             })
     }
 }
-module.exports = DoctorController
+module.exports = ScheduleController

@@ -1,13 +1,12 @@
 const { Appointment } = require('../models')
 class appointmentController {
     static createAppointment(req, res) {
-        const { idUser, idDokter, waktu, keterangan } = req.body
-
+        const { idUser, idDokter, waktu, noUrut } = req.body
         Appointment.create({
             idUser, 
             idDokter, 
             waktu, 
-            keterangan
+            noUrut
         })
             .then(result => {
                 res.status(201).json(result)
@@ -27,13 +26,13 @@ class appointmentController {
     }
     static updateAppointmentById(req, res) {
         let id = req.params.id
-        const { idUser, idDokter, waktu, keterangan } = req.body
+        const { idUser, idDokter, waktu, noUrut } = req.body
 
         Appointment.update({
             idUser, 
             idDokter, 
             waktu, 
-            keterangan
+            noUrut
         }, {
             where: {
                 id
