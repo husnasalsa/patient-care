@@ -34,7 +34,7 @@ class ScheduleController {
                         "statusCode": 404,
                         "message": `Schedule with id '${id}' is not found` 
                     }
-                    res.status(404).json(response)
+                    throw(res.status(404).json(response))
                 }
             })
             .catch(err => {

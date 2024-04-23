@@ -8,8 +8,8 @@ class appointmentController {
             waktu, 
             noUrut
         })
-            .then(result => {
-                res.status(201).json(result)
+            .then(response => {
+                res.status(201).json(response)
             })
             .catch(err => {
                 res.status(500).json(err)
@@ -17,8 +17,8 @@ class appointmentController {
     }
     static getAllAppointment(req, res) {
         Appointment.findAll()
-            .then(result => {
-                res.status(200).json(result)
+            .then(response => {
+                res.status(200).json(response)
             })
             .catch(err => {
                 res.status(500).json(err)
@@ -40,8 +40,8 @@ class appointmentController {
             returning : true
             }
         )
-            .then(result => {
-                res.status(201).json(result)
+            .then(response => {
+                res.status(200).json(response)
             })
             .catch(err => {
                 res.status(500).json(err)
@@ -55,8 +55,8 @@ class appointmentController {
                 id
             }
         })
-            .then(result => {
-                res.status(200).json(result)
+            .then(response => {
+                res.status(200).json(response)
             })
             .catch(err => {
                 res.status(500).json(err)
