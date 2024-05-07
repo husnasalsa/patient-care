@@ -26,6 +26,12 @@ class userController {
     }
     static login(req, res) {
         const { email, password } = req.body
+        let options = {
+            maxAge: 1000 * 60 * 15, // 15 minutes
+            httpOnly: true,
+            sameSite: "none",
+            secure: true
+        }
         User.findOne({
             where: {
                 email
@@ -53,12 +59,20 @@ class userController {
                     username: user.username
                 }
                 const token = generateToken(payload)
-                
-                res.status(201).json({token : token})
+                delete user.password
+                res.cookie('token', token, options)
+                res.status(200).json({token : token})
             })
             .catch(err => {
                 console.log(err)
                 res.status(401).json(err)})
+    }
+    static logout(req, res) {
+        delete res.locals.user
+        let response = {
+            msg: 'Log out berhasil. Token dihapus',
+        }
+        return res.clearCookie("token").status(200).json(response)
     }
 }
 module.exports = userController

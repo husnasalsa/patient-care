@@ -28,7 +28,7 @@ module.exports = {
         },
         type: Sequelize.DATE
       },
-      keterangan: {
+      noUrut: {
         type: Sequelize.TEXT
       },
       createdAt: {

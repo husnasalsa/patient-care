@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt")
-
+require("dotenv").config();
+const saltRounds = parseInt(process.env.GARAM)
 function hashPassword(userPwd){
-    const saltRounds = 6
     const salt = bcrypt.genSaltSync(saltRounds)
     const hash = bcrypt.hashSync(userPwd, salt)
     return hash

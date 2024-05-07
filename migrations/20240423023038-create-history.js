@@ -10,13 +10,18 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       idUser: {
+        allowNull: false,
         type: Sequelize.STRING
       },
       idDokter: {
+        allowNull: false,
         type: Sequelize.STRING
       },
       waktu: {
         type: Sequelize.DATE
+      },
+      biayaKonsultasi: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,

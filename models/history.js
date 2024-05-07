@@ -11,14 +11,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User)
-      this.belongsTo(models.Doctor)
     }
   }
   History.init({
     idUser: DataTypes.STRING,
     idDokter: DataTypes.STRING,
-    waktu: DataTypes.DATE
+    waktu: DataTypes.DATE,
+    biayaKonsultasi: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'History',

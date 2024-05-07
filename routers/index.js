@@ -4,19 +4,26 @@ const userController = require('../controllers/userController')
 const doctorController = require('../controllers/doctorController')
 const appointmentController = require('../controllers/appointmentController');
 const scheduleController = require('../controllers/scheduleController');
-
+const historyController = require('../controllers/historyController');
+const auth = require('../middlewares/auth')
 router.post('/register', userController.register)
 router.post('/login', userController.login)
+router.post('/logout', auth, userController.logout)
 
 router.get('/doctor', doctorController.getAllDoctor)
 router.get('/doctor/:id', doctorController.getDoctorById)
 
 router.get('/schedule', scheduleController.getAllSchedule)
 router.get('/schedule/:id', scheduleController.getScheduleByDoctorId)
+router.get('/schedule-filter', scheduleController.getScheduleFilterByDay)
 
-router.post('/appointment', appointmentController.createAppointment)
-router.get('/appointment', appointmentController.getAllAppointment)
-router.put('/appointment:id', appointmentController.updateAppointmentById)
-router.delete('/appointment:id', appointmentController.deleteAppointmentById)
+router.post('/appointment', auth, appointmentController.createAppointment)
+router.get('/appointment', auth, appointmentController.getAllAppointment)
+router.get('/appointment/:id', auth, appointmentController.getAllAppointment)
+router.put('/appointment/:id', auth, appointmentController.updateAppointmentById)
+router.delete('/appointment/:id', auth, appointmentController.deleteAppointmentById)
 
+router.post('/history', auth, historyController.createHistory)
+router.get('/history', auth, historyController.getAllHistory)
+router.get('/history/:page', auth, historyController.getHistoryPagination)
 module.exports = router;

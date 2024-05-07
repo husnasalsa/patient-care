@@ -11,14 +11,18 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.Doctor)
+      //this.belongsTo(models.Doctor)
     }
   }
   Schedule.init({
     idDokter: DataTypes.STRING,
     kuota: DataTypes.INTEGER,
-    hari: DataTypes.STRING,
-    waktu: DataTypes.TIME
+    hari: {
+      type: DataTypes.ENUM,
+      values: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+    },
+    startTime: DataTypes.TIME,
+    endTime: DataTypes.TIME
   }, {
     sequelize,
     modelName: 'Schedule',

@@ -16,9 +16,13 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       hari: {
-        type: Sequelize.STRING
+        type: Sequelize.ENUM,
+        values: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
       },
-      waktu: {
+      startTime: {
+        type: Sequelize.TIME
+      },
+      endTime: {
         type: Sequelize.TIME
       },
       createdAt: {

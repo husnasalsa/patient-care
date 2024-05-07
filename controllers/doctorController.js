@@ -1,4 +1,3 @@
-const { json } = require('sequelize')
 const { Doctor } = require('../models')
 class DoctorController {
     static getAllDoctor(req, res) {
@@ -30,7 +29,6 @@ class DoctorController {
                     res.status(200).json(response)
                 } else {
                     let response = {
-                        "statusCode": 404,
                         "message": `Data with id '${id}' is not found` 
                     }
                     throw(res.status(404).json(response))

@@ -27,9 +27,13 @@ module.exports = {
       email: {
         type: Sequelize.STRING
       },
-      jadwal: {
+      srcFoto: {
         allowNull: false,
         type: Sequelize.STRING
+      },
+      hargaKonsultasi: {
+        allowNull: false,
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,

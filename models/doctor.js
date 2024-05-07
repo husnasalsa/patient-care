@@ -10,8 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      this.hasMany(models.Appointment)
-      this.hasMany(models.Schedule)
+
     }
   }
   Doctor.init({
@@ -20,6 +19,8 @@ module.exports = (sequelize, DataTypes) => {
     alamatPraktek: DataTypes.STRING,
     telepon: DataTypes.STRING,
     email: DataTypes.STRING,
+    srcFoto: DataTypes.STRING,
+    hargaKonsultasi: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'Doctor',
