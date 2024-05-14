@@ -1,13 +1,11 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
-const sequelize = require('../seq');
-const { app, syncDatabase } = require('../app');
+const sequelize = require('sequelize')
 
 let authToken;
 
 beforeAll(async () => {
-    await syncDatabase();
-    const payload = { userId: 1 };
+    const payload = { id: 1 };
     authToken = jwt.sign(payload, process.env.JWT_SECRET);
 });
 

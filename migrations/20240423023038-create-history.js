@@ -11,11 +11,11 @@ module.exports = {
       },
       idUser: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       idDokter: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       waktu: {
         type: Sequelize.DATE

@@ -18,7 +18,7 @@ class historyController {
         const authUser = res.locals.user
         History.findAll({
             where: {
-                idUser: authUser.id
+                idUser: parseInt(authUser.id)
             },
           })
             .then(result => {

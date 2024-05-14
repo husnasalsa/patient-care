@@ -1,21 +1,46 @@
-const { Appointment, Schedule } = require('../models')
+const { Appointment, Schedule, History, Doctor } = require('../models')
+const { Op, Sequelize } = require("sequelize");
 class appointmentController {
-    static createAppointment(req, res) {
-        const { idUser, idDokter, waktu, noUrut } = req.body
+    static async createAppointment(req, res) {
+        const { idUser, idDokter, waktu } = req.body
         //Check if schedule available
-        //WIP
-        Appointment.create({
-            idUser, 
-            idDokter, 
-            waktu, 
-            noUrut
-        })
-            .then(response => {
-                res.status(201).json(response)
+        const d = new Date(waktu)
+        let day = d.getDay()
+        let time = d.toLocaleTimeString();
+        const dayofweek = ['Minggu','Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+        let schedule = await Schedule.findAll({
+            where: {
+                idDokter: idDokter,
+                hari: dayofweek[day],
+                startTime: {
+                    [Op.lt]: time,
+                },
+                endTime: {
+                    [Op.gt]: time,
+                }
+            }
+          })
+        console.log(schedule)
+        let count = await Appointment.sequelize.query(`SELECT count(*) FROM "Appointments" WHERE "idDokter" = '${idDokter}' AND DATE_TRUNC('day', "waktu") = DATE_TRUNC('day', '${d.toISOString().split('T')[0]}'::date)`, {
+            type: Sequelize.QueryTypes.SELECT,
+          });
+        let noUrut = count[0].count++
+        //console.log(noUrut)
+        if (schedule && noUrut <= schedule[0].kuota) {
+            Appointment.create({
+                idUser, 
+                idDokter, 
+                waktu,
+                noUrut
             })
-            .catch(err => {
-                res.status(500).json(err)
-            })
+                .then(response => {
+                    res.status(201).json(response)
+                })
+                .catch(err => {
+                    res.status(500).json(err)
+                })
+        }
+        
     }
     static getAllAppointment(req, res) {
         const authUser = res.locals.user
@@ -47,19 +72,22 @@ class appointmentController {
                 res.status(500).json(err)
             })
     }
-    static updateAppointmentById(req, res) {
+    static async updateAppointmentById(req, res) {
         let id = req.params.id
         const authUser = res.locals.user
-        const { idUser, idDokter, waktu, noUrut } = req.body
-        if (authUser.id == idUser) {
+        const { idDokter } = req.body
+        const app = await Appointment.findOne({
+            where: {
+                id: id
+            },
+        })
+        //console.log(app)
+        if (authUser.id == app.idUser) {
             Appointment.update({
-                idUser, 
-                idDokter, 
-                waktu, 
-                noUrut
+                idDokter
             }, {
                 where: {
-                    id
+                    id: id
                 },
                 returning : true
                 }
@@ -77,14 +105,21 @@ class appointmentController {
             return res.status(403).json(response)
         }
     }
-    static deleteAppointmentById(req, res) {
+    static async deleteAppointmentById(req, res) {
         let id = req.params.id
         const authUser = res.locals.user
-        const app = Appointment.findOne({
+        const app = await Appointment.findOne({
             where: {
                 id: id
             },
         })
+        //console.log(app)
+        const biaya = await Doctor.findOne({
+            where: {
+                id: app.idDokter
+            },
+        })
+        //console.log(biaya)
         if (app) {
             if (app.idUser == authUser.id) {
                 Appointment.destroy({
@@ -98,6 +133,12 @@ class appointmentController {
                     .catch(err => {
                         res.status(500).json(err)
                     })
+                History.create({
+                    idUser: app.idUser,
+                    idDokter: app.idDokter,
+                    waktu: app.waktu,
+                    biayaKonsultasi: biaya.hargaKonsultasi
+                })
             } else {
                 let response = {
                     "message": `User with id '${authUser.id}' is not authorized to update appointment '${id}'` 

@@ -15,14 +15,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Schedule.init({
-    idDokter: DataTypes.STRING,
+    idDokter: DataTypes.INTEGER,
     kuota: DataTypes.INTEGER,
     hari: {
       type: DataTypes.ENUM,
       values: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
     },
     startTime: DataTypes.TIME,
-    endTime: DataTypes.TIME
+    endTime: DataTypes.TIME,
   }, {
     sequelize,
     modelName: 'Schedule',

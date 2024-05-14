@@ -29,7 +29,7 @@ module.exports = {
         type: Sequelize.DATE
       },
       noUrut: {
-        type: Sequelize.TEXT
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,

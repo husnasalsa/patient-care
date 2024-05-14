@@ -14,8 +14,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   History.init({
-    idUser: DataTypes.STRING,
-    idDokter: DataTypes.STRING,
+    idUser: DataTypes.INTEGER,
+    idDokter: DataTypes.INTEGER,
     waktu: DataTypes.DATE,
     biayaKonsultasi: DataTypes.INTEGER,
   }, {
