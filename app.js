@@ -15,7 +15,6 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.use('/api', router)
-app.use(errorMiddleware);
 
 app.listen(PORT, () => {
     console.log(`Running on port ${PORT}`)
