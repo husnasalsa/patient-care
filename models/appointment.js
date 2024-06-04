@@ -15,10 +15,30 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Appointment.init({
-    idUser: DataTypes.INTEGER,
-    idDokter: DataTypes.INTEGER,
-    waktu: DataTypes.DATE,
-    noUrut: DataTypes.INTEGER
+    idUser: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    idDokter: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    waktu: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      validate: {
+        customValidator(value) {
+          if (new Date(value) < new Date()) {
+            throw new Error("invalid date");
+          }
+        }
+      }
+    },
+    noUrut: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      min: 1
+    },
   }, {
     sequelize,
     modelName: 'Appointment',

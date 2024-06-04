@@ -14,10 +14,22 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   History.init({
-    idUser: DataTypes.INTEGER,
-    idDokter: DataTypes.INTEGER,
-    waktu: DataTypes.DATE,
-    biayaKonsultasi: DataTypes.INTEGER,
+    idUser: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    idDokter: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    waktu: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    biayaKonsultasi: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   }, {
     sequelize,
     modelName: 'History',

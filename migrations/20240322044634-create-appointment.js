@@ -29,7 +29,9 @@ module.exports = {
         type: Sequelize.DATE
       },
       noUrut: {
-        type: Sequelize.INTEGER
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        min: 1
       },
       createdAt: {
         allowNull: false,

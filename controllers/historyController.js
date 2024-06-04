@@ -1,18 +1,28 @@
 const { History } = require('../models')
 class historyController {
     static createHistory(req, res) {
-        const { idUser, idDokter, waktu } = req.body
-       History.create({
-            idUser, 
-            idDokter, 
-            waktu
-        })
-            .then(response => {
-                res.status(201).json(response)
+        const idUser = res.locals.user.id
+        const { idDokter, waktu } = req.body
+        if (!idUser) {
+            return res.status(401).json({error: 'Not Authenticated'})
+        } else if (idDokter && waktu) {
+            History.create({
+                idUser, 
+                idDokter, 
+                waktu
             })
-            .catch(err => {
-                res.status(500).json(err)
-            })
+                .then(response => {
+                    return res.status(201).json(response)
+                })
+                .catch(err => {
+                    return res.status(500).json(err)
+                })
+        } else {
+            let err = {
+                error: 'Required input not complete'
+            }
+            return res.status(400).json(err)
+        }
     }
     static getAllHistory(req, res) {
         const authUser = res.locals.user
@@ -26,40 +36,51 @@ class historyController {
                     "statusCode": 200,
                     "data": result
                 }
-                res.status(200).json(response)
+                return res.status(200).json(response)
             })
             .catch(err => {
                 let response = {
                     "statusCode": 500,
-                    "error": err
+                    "err": err
                 }
-                res.status(500).json(response)
+                return res.status(500).json(response)
             })
     }
     static getHistoryPagination(req, res) {
-        const authUser = res.locals.user
-        const page = req.params.page
-        const limit = 3
-        History.findAndCountAll({
-            where: {idUser: authUser.id},
-            order: ['createdAt'],
-            limit: limit,
-            offset: limit * (page - 1),
-        })
-            .then((result) => {
-                let response = {
-                    "statusCode": 200,
-                    "data": result
-                }
-                res.status(200).json(response)
+        const idUser = res.locals.user.id
+        const page = parseInt(req.params.page) || 1;
+        const limit = parseInt(req.params.limit) || 3;
+        const offset = (page - 1) * limit;
+        if (!idUser) {
+            return res.status(401).json({error: 'Not Authenticated'})
+        } else if (page && limit) {
+            History.findAndCountAll({
+                where: {idUser: idUser},
+                order: ['createdAt'],
+                limit: limit,
+                offset: offset,
             })
-            .catch(err => {
-                let response = {
-                    "statusCode": 500,
-                    "error": err
-                }
-                res.status(500).json(response)
-            })
+                .then((result) => {
+                    let response = {
+                        "statusCode": 200,
+                        "data": result
+                    }
+                    return res.status(200).json(response)
+                })
+                .catch(err => {
+                    let response = {
+                        "statusCode": 500,
+                        "error": err
+                    }
+                    return res.status(500).json(response)
+                })
+        } else {
+            let err = {
+                error: 'Required input not complete'
+            }
+            return res.status(400).json(err)
+        }
+        
     }
 }
 module.exports = historyController

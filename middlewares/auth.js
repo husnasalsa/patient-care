@@ -14,8 +14,7 @@ function auth(req, res, next) {
         .then (user => {
             if(!user) {
                 throw res.status(401).json({
-                    name: "Auth Error",
-                    devMessage: `User with id '${userDecoded.id}' is not found`
+                    error: `User with id '${userDecoded.id}' is not found`
                 })
             }
             res.locals.user = user

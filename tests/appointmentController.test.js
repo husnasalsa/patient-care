@@ -1,202 +1,240 @@
 const request = require('supertest');
-const jwt = require('jsonwebtoken');
-const sequelize = require('sequelize')
+const sequelize = require('../seq');
+const { app, syncDatabase } = require('../app');
+const Appointment = require('../models/doctor');
 
-let authToken;
-
+let cookies = ''
 beforeAll(async () => {
-    const payload = { id: 1 };
-    authToken = jwt.sign(payload, process.env.JWT_SECRET);
+  await syncDatabase();
+  const resp = await request(app).post("/api/login").send({
+    email: 'patient3@email.com',
+    password: 'patient3',
+  });
+  cookies = resp.headers['set-cookie']
 });
-
-describe('POST /api/appointments', () => {
+describe('POST /api/appointment', () => {
     it('should create a new appointment', async () => {
-        const response = await request(app) 
-        .post('/api/appointments')
-        .set('Authorization', `Bearer ${authToken}`)
+        const res = await request(app) 
+        .post('/api/appointment')
+        .set('Cookie', `token=${cookies}`)
         .send({
-            userId: 1,
-            doctorId: 1,
-            time: '2025-04-28T12:00:00',
-            description: 'Regular checkup'
+            idDokter: 4,
+            waktu: '2024-06-05 16:47'
         });
-        console.log(response);
-
-        newid = response._body.newAppointment.id
-        console.log(newid);
-        expect(response.statusCode).toBe(201);
-        expect(response.body).toHaveProperty('newAppointment');
-        expect(response.body.newAppointment).toHaveProperty('id');
-        expect(response.body.newAppointment.userId).toBe(1); 
+        console.log(res);
+        expect(res.statusCode).toBe(201);
+        expect(res.body).toHaveProperty('id');
+        expect(res.body).toHaveProperty('idUser');
+        expect(res.body).toHaveProperty('idDokter');
+        expect(res.body).toHaveProperty('waktu');
+        expect(res.body).toHaveProperty('noUrut');
+        expect(res.body).toHaveProperty('updatedAt');
+        expect(res.body).toHaveProperty('createdAt');
     });
   
     it('should return 400 if required fields are missing', async () => {
-        const response = await request(app) 
-        .post('/api/appointments')
-        .set('Authorization', `Bearer ${authToken}`)
+        const res = await request(app) 
+        .post('/api/appointment')
+        .set('Cookie', `token=${cookies}`)
         .send({
-            doctorId: 1,
-            time: '2025-04-28T12:00:00',
-            description: 'Regular checkup'
+            idDokter: 4,
+            waktu: '2024-06-05 16:47'
         });
-        expect(response.statusCode).toBe(400); 
-        expect(response.body).toHaveProperty('error');
+        expect(res.statusCode).toBe(400); 
+        expect(res.body).toHaveProperty('error');
+        expect(res.body.error).toBe('Required input not complete');
     });
   
     it('should return 403 if user does not have access', async () => {
-      const response = await request(app) 
-      .post('/api/appointments')
-      .set('Authorization', `Bearer `)
-      .send({
-          userId: 1,
-          doctorId: 1,
-          time: '2025-04-28T12:00:00',
-          description: 'Regular checkup'
-      });
-      expect(response.statusCode).toBe(403);
-      expect(response.body).toHaveProperty('error');
+      const res = await request(app) 
+      .post('/api/appointment')
+        .set('Cookie', `token=${cookies}`)
+        .send({
+            idDokter: 4,
+            waktu: '2024-06-05 16:47'
+        });
+      expect(res.statusCode).toBe(401);
+      expect(res.body.error).toBe('Not Authenticated');
   });
     it('should return 500 if other error occurs', async () => {
-      const response = await request(app)
-        .post('/api/appointments')
-        .set('Authorization', `Bearer ${authToken}`)
+      jest.spyOn(Appointment, 'findAll').mockImplementation(() => {
+        throw new Error('Internal server error');
+      });
+      const res = await request(app) 
+      .post('/api/appointment')
+        .set('Cookie', `token=${cookies}`)
         .send({
-          userId: 100000,
-          doctorId: 1,
-          time: '2025-04-28T12:00:00',
-          description: 'Regular checkup'
+            idDokter: 4,
+            waktu: '2024-06-05 16:47'
         });
-
-      expect(response.statusCode).toBe(500);
-      expect(response.body).toHaveProperty('error');
-      expect(response.body.error).toBe('Internal Server Error');
+      expect(res.statusCode).toBe(500);
+      expect(res.body).toHaveProperty('error');
+      expect(res.body.error).toBe('Internal Server Error');
     });
 
 });
- 
-describe('GET /api/appointments/:id', () => {
-  it('should get an existing appointment', async () => {
-    const response = await request(app)
-    .get('/api/appointments/1');
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('appointment');
-    expect(response.body.appointment).toHaveProperty('id');
-    expect(response.body.appointment.id).toBe(1); 
+describe('GET /api/appointment/', () => {
+  it('should get user appointments', async () => {
+    const res = await request(app)
+    .get('/api/appointment')
+    .set('Cookie', `token=${cookies}`);
+    expect(res.statusCode).toBe(200);
   });
 
-  it('should return 404 if appointment are missing', async () => {
-    const response = await request(app)
-    .get('/api/appointments/999999');
-    expect(response.statusCode).toBe(404);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toBe('Appointment not found');
+  it('should return 401 if not not auth', async () => {
+    const res = await request(app)
+    .get('/api/appointment');
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toBe('Appointment not found');
   });
+  
 
   it('should return 500 if other error occurs',  async () => {
-    const response = await request(app)
-    .get('/api/appointments/99999999999999');
-    expect(response.statusCode).toBe(500);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toBe('Internal Server Error');
+    jest.spyOn(Appointment, 'findOne').mockImplementation(() => {
+      throw new Error('Internal server error');
+    });
+    const res = await request(app)
+    .get('/api/appointment')
+    .set('Cookie', `token=${cookies}`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toBe('Internal Server Error');
+  });
+});  
+ 
+describe('GET /api/appointment/:id', () => {
+  it('should get an existing appointment', async () => {
+    const res = await request(app)
+    .get('/api/appointment/5')
+    .set('Cookie', `token=${cookies}`);
+    expect(res.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('id');
+    expect(response.body).toHaveProperty('idUser');
+    expect(response.body).toHaveProperty('idDokter');
+    expect(response.body).toHaveProperty('waktu');
+    expect(response.body).toHaveProperty('noUrut');
+    expect(response.body).toHaveProperty('updatedAt');
+    expect(response.body).toHaveProperty('createdAt');
   });
 
+  it('should return 404 if appointment are missing', async () => {
+    const res = await request(app)
+    .get('/api/appointment/999999')
+    .set('Cookie', `token=${cookies}`);
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toBe('Appointment not found');
+  });
+  it('should return 401 if appointment are missing', async () => {
+    const res = await request(app)
+    .get('/api/appointment/5');
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toBe('Appointment not found');
+  });
+  
+
+  it('should return 500 if other error occurs',  async () => {
+    jest.spyOn(Appointment, 'findOne').mockImplementation(() => {
+      throw new Error('Internal server error');
+    });
+    const res = await request(app)
+    .get('/api/appointment/99999999999999')
+    .set('Cookie', `token=${cookies}`);
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toBe('Internal Server Error');
+  });
 });  
 
-describe('DELETE /api/appointments/:id', () => {
+describe('DELETE /api/appointment/:id', () => {
   it('should delete an existing appointment', async () => {
-    const response = await request(app)
-    .delete(`/api/appointments/${newid}`)
-    .set('Authorization', `Bearer ${authToken}`)
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('message');
-    expect(response.body.message).toBe('Appointment deleted successfully');
+    const res = await request(app)
+    .delete(`/api/appointment/5`)
+    .set('Cookie', `token=${cookies}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
   });
 
   it('should return 404 if appointment are missing', async () => {
-    const response = await request(app)
-    .delete('/api/appointments/999999')
-    .set('Authorization', `Bearer ${authToken}`);
-    expect(response.statusCode).toBe(404);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toBe('Appointment not found');
+    const res = await request(app)
+    .delete('/api/appointment/999999')
+    .set('Cookie', `token=${cookies}`);;
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toBe("Appointment with id '999999' is not found");
   
   });
 
-  it('should return 403 if user does not have access', async () => {
-    const response = await request(app) 
-    .delete(`/api/appointments/2`)
-    .set('Authorization', `Bearer `)
-    expect(response.statusCode).toBe(403);
-    expect(response.body).toHaveProperty('error');
+  it('should return 401 if user does not have access', async () => {
+    const res = await request(app) 
+    .delete(`/api/appointment/10`)
+    expect(res.statusCode).toBe(403);
+    expect(res.body).toHaveProperty('error');
   });
 
   it('should return 500 if other error occurs', async () => {
-    const response = await request(app)
-    .delete('/api/appointments/99999999999999')
-    .set('Authorization', `Bearer ${authToken}`);
-    expect(response.statusCode).toBe(500);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toBe('Internal Server Error');
+    jest.spyOn(Appointment, 'destroy').mockImplementation(() => {
+      throw new Error('Internal server error');
+    });
+    const res = await request(app)
+    .delete('/api/appointment/99999999999999')
+    .set('Cookie', `token=${cookies}`);;
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toBe('Internal Server Error');
   });
 });  
 
-describe('PATCH /api/appointments/:id', () => {
+describe('PUT /api/appointment/:id', () => {
   it('should update an existing appointment', async () => {
-    const response = await request(app)
-    .patch(`/api/appointments/1`)
-    .set('Authorization', `Bearer ${authToken}`)
+    const res = await request(app)
+    .put(`/api/appointment/10`)
+    .set('Cookie', `token=${cookies}`)
     .send({
-      doctorId: 3,
-      time: '2024-12-12T12:00:00',
-      description: 'Edit Checkup'
+      waktu: '2024-06-05 17:47'
   });
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('message');
-    expect(response.body.message).toBe('Appointment updated successfully');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message');
+    expect(res.body.message).toBe('Appointment updated successfully');
   });
 
   it('should return 404 if appointment are missing', async () => {
-    const response = await request(app)
-    .patch(`/api/appointments/9999`)
-    .set('Authorization', `Bearer ${authToken}`)
+    const res = await request(app)
+    .put(`/api/appointment/9999`)
+    .set('Cookie', `token=${cookies}`)
     .send({
-      doctorId: 5,
-      time: '2029-12-12T12:00:00',
-      description: 'Edit Checkup'
+      waktu: '2024-06-05 17:47',
   });
-
-    expect(response.statusCode).toBe(404);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toBe('Appointment not found');
-  
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toHaveProperty('error');
   });
 
   it('should return 403 if user does not have access', async () => {
-    const response = await request(app) 
-    .patch(`/api/appointments/1`)
-    .set('Authorization', `Bearer `)
+    const res = await request(app) 
+    .put(`/api/appointment/1`)
     .send({
-      doctorId: 3,
-      time: '2024-12-12T12:00:00',
-      description: 'Edit Checkup'
+      waktu: '2024-06-05 17:47'
   });
-    expect(response.statusCode).toBe(403);
-    expect(response.body).toHaveProperty('error');
+    expect(res.statusCode).toBe(403);
+    expect(res.body).toHaveProperty('error');
   });
 
   it('should return 500 if other error occurs', async () => {
-    const response = await request(app)
-    .patch(`/api/appointments/99999999999999999`)
-    .set('Authorization', `Bearer ${authToken}`)
+    jest.spyOn(Appointment, 'findOne').mockImplementation(() => {
+      throw new Error('Internal server error');
+    });
+    const res = await request(app)
+    .put(`/api/appointment/99999999999999999`)
+    .set('Cookie', `token=${cookies}`)
     .send({
-      doctorId: 3,
-      time: '2024-12-12T12:00:00',
-      description: 'Edit Checkup'
+      waktu: '2024-06-05 17:47'
   });
 
-    expect(response.statusCode).toBe(500);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toBe('Internal Server Error');
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toBe('Internal Server Error');
   });
 });  
 

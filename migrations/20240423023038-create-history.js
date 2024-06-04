@@ -18,9 +18,11 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       waktu: {
+        allowNull: false,
         type: Sequelize.DATE
       },
       biayaKonsultasi: {
+        allowNull: false,
         type: Sequelize.INTEGER
       },
       createdAt: {

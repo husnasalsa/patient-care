@@ -14,13 +14,34 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Doctor.init({
-    nama: DataTypes.STRING,
-    spesialis: DataTypes.STRING,
-    alamatPraktek: DataTypes.STRING,
-    telepon: DataTypes.STRING,
-    email: DataTypes.STRING,
-    srcFoto: DataTypes.STRING,
-    hargaKonsultasi: DataTypes.INTEGER,
+    nama: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    spesialis: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    alamatPraktek: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    telepon: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    srcFoto: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    hargaKonsultasi: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   }, {
     sequelize,
     modelName: 'Doctor',

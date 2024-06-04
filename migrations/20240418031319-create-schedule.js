@@ -10,19 +10,24 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       idDokter: {
+        allowNull: false,
         type: Sequelize.INTEGER
       },
       kuota: {
+        allowNull: false,
         type: Sequelize.INTEGER
       },
       hari: {
+        allowNull: false,
         type: Sequelize.ENUM,
         values: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
       },
       startTime: {
+        allowNull: false,
         type: Sequelize.TIME
       },
       endTime: {
+        allowNull: false,
         type: Sequelize.TIME
       },
       createdAt: {
