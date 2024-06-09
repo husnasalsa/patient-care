@@ -12,7 +12,7 @@ class userController {
         return res.status(400).json({ error: 'Password must be between 5 to 20 character long.' });
         }
         if (username && email && password && phoneNumber) {
-            User.create({
+            await User.create({
                 username, 
                 email, 
                 password, 
@@ -28,7 +28,6 @@ class userController {
                     res.status(201).json(response)
                 })
                 .catch(err => {
-                    console.log(err)
                     res.status(500).json(err)
                 })
         } else {
@@ -37,7 +36,7 @@ class userController {
             })
         }
     }
-    static login(req, res) {
+    static async login(req, res) {
         const { email, password } = req.body
         if (email && password) {
             let options = {
@@ -45,8 +44,9 @@ class userController {
                 httpOnly: true,
                 sameSite: "none",
                 secure: true
+                
             }
-            User.findOne({
+            await User.findOne({
                 where: {
                     email
                 }
@@ -71,11 +71,14 @@ class userController {
                     const token = generateToken(payload)
                     delete user.password
                     res.cookie('token', token, options)
-                    console.log(res.cookie('token', token, options))
-                    return res.status(200).json({token : token, id: user.id})
+                    return res.status(200).json(
+                        { token : token,
+                          id: user.id,
+                          email: user.email,
+                          username: user.username })
                 })
                 .catch(err => {
-                    return res.status(500).json(err)})
+                    return res.data.status(500).json(err)})
         } else {
             return res.status(400).json({
                 error: 'Required input not complete'

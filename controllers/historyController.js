@@ -1,12 +1,12 @@
 const { History } = require('../models')
 class historyController {
-    static createHistory(req, res) {
+    static async createHistory(req, res) {
         const idUser = res.locals.user.id
         const { idDokter, waktu } = req.body
         if (!idUser) {
             return res.status(401).json({error: 'Not Authenticated'})
         } else if (idDokter && waktu) {
-            History.create({
+            await History.create({
                 idUser, 
                 idDokter, 
                 waktu
@@ -24,9 +24,9 @@ class historyController {
             return res.status(400).json(err)
         }
     }
-    static getAllHistory(req, res) {
+    static async getAllHistory(req, res) {
         const authUser = res.locals.user
-        History.findAll({
+        await History.findAll({
             where: {
                 idUser: parseInt(authUser.id)
             },
@@ -46,7 +46,7 @@ class historyController {
                 return res.status(500).json(response)
             })
     }
-    static getHistoryPagination(req, res) {
+    static async getHistoryPagination(req, res) {
         const idUser = res.locals.user.id
         const page = parseInt(req.params.page) || 1;
         const limit = parseInt(req.params.limit) || 3;
@@ -54,7 +54,7 @@ class historyController {
         if (!idUser) {
             return res.status(401).json({error: 'Not Authenticated'})
         } else if (page && limit) {
-            History.findAndCountAll({
+            await History.findAndCountAll({
                 where: {idUser: idUser},
                 order: ['createdAt'],
                 limit: limit,

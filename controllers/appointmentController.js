@@ -58,9 +58,9 @@ class appointmentController {
             res.status(400).json(err)
         }
     }
-    static getAllAppointment(req, res) {
+    static async getAllAppointment(req, res) {
         const authUser = res.locals.user
-        Appointment.findAll({
+        await Appointment.findAll({
             where: {
                 idUser: authUser.id
             },
@@ -72,13 +72,13 @@ class appointmentController {
                 return res.status(500).json(err)
             })
     }
-    static getAppointmentById(req, res) {
+    static async getAppointmentById(req, res) {
         const authUser = res.locals.user
         const id = req.params.id
         if (!authUser) {
             return res.status(401).json({error: 'Not Authenticated'})
         } else {
-            Appointment.findOne({
+            await Appointment.findOne({
                 where: {
                     id: id
                 },
@@ -133,7 +133,7 @@ class appointmentController {
                 });
                 let noUrut = count[0].count++
                 if (schedule && noUrut <= schedule[0]?.kuota){
-                    Appointment.update({
+                    await Appointment.update({
                         waktu
                     }, {
                         where: {
@@ -183,7 +183,7 @@ class appointmentController {
                             id: app.idDokter
                         },
                     })
-                    Appointment.destroy({
+                    await Appointment.destroy({
                         where: {
                             id
                         }
@@ -194,7 +194,7 @@ class appointmentController {
                         .catch(err => {
                             return res.status(500).json(err)
                         })
-                    History.create({
+                    await History.create({
                         idUser: app.idUser,
                         idDokter: app.idDokter,
                         waktu: app.waktu,

@@ -1,8 +1,8 @@
 const { Doctor } = require('../models')
 const { QueryTypes, sequelize } = require('sequelize');
 class DoctorController {
-    static getAllDoctor(req, res) {
-        Doctor.findAll()
+    static async getAllDoctor(req, res) {
+        await Doctor.findAll()
             .then(result => {
                 let response = {
                     "statusCode": 200,
@@ -18,10 +18,10 @@ class DoctorController {
                 return res.status(500).json(response)
             })
     }
-    static getDoctorById(req, res) {
+    static async getDoctorById(req, res) {
         let id = req.params.id
         if (id) {
-            Doctor.findByPk(id)
+            await Doctor.findByPk(id)
             .then(result => {
                 if (result) {
                     let response = {
@@ -51,7 +51,7 @@ class DoctorController {
         const day = req.body.day
         const dayofweek = ['Minggu','Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
             if (dayofweek.includes(day)) {
-                Doctor.sequelize.query(`select * FROM "Doctors" AS "Doctor" WHERE "Doctor"."id" in 
+                await Doctor.sequelize.query(`select * FROM "Doctors" AS "Doctor" WHERE "Doctor"."id" in 
                 (SELECT "idDokter" FROM "Schedules" AS "Schedule" WHERE "Schedule"."hari" = '${day}')`, {
                     type: QueryTypes.SELECT,
                   })

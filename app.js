@@ -10,7 +10,11 @@ if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
   }
 
-app.use(cors())
+const corsConfig = {
+    credentials: true,
+    origin: true,
+};
+app.use(cors(corsConfig));
 app.use(cookieParser());
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())

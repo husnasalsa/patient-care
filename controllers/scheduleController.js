@@ -1,8 +1,8 @@
 const { Schedule } = require('../models')
 const { Op } = require("sequelize");
 class ScheduleController {
-    static getAllSchedule(req, res) {
-        Schedule.findAll()
+    static async getAllSchedule(req, res) {
+        await Schedule.findAll()
             .then(result => {
                 let response = {
                     "statusCode": 200,
@@ -18,10 +18,10 @@ class ScheduleController {
                 return res.status(500).json(response)
             })
     }
-    static getScheduleByDoctorId(req, res) {
+    static async getScheduleByDoctorId(req, res) {
         let id = req.params.id
         if (id) {
-            Schedule.findAll({
+            await Schedule.findAll({
                 where: {
                     idDokter: id
                 },
